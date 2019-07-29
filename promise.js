@@ -1,6 +1,3 @@
-
-
-
 class MyPromise {
     constructor(excute) {
         this.state = 'pending'
@@ -33,14 +30,14 @@ class MyPromise {
         this.onRejectedFunc.forEach(catchhCb => catchhCb(rejectArg))
         this.state = 'reject'
     }
-    catch(catchhCb){
-      return   this.then(null,catchhCb)
+    catch (catchhCb) {
+        return this.then(null, catchhCb)
     }
 
 
     then(thenCb, catchhCb) {
         //成功和失败默认不穿给一个函数
-         
+
         thenCb = typeof thenCb === 'function' ? thenCb : function (value) {
             return value;
         }
@@ -49,51 +46,51 @@ class MyPromise {
         }
         // let this = this;
         let promise2; //返回的promise
-        if (this.state === 'resolve') {
-            promise2 = new MyPromise((resolve, reject) => {
-                // 当成功或者失败执行时有异常那么返回的promise应该处于失败状态
-                // x可能是一个promise 也有可能是一个普通的值
-                setImmediate(() => {
+        switch (this.state) {
+            case 'pending':
+                promise2 = new MyPromise((resolve, reject) => {
+                    // 此时没有resolve 也没有reject
 
-                    try {
-                        let x = thenCb(this.value);
-                        // x可能是别人promise，写一个方法统一处理
-                        this.resolvePromise(promise2, x, resolve, reject);
-                    } catch (e) {
-                        reject(e);
-                    }
+                    this.onfullilledFunc.push(() => {
+                        setImmediate(() => {
+                            try {
+                                let x = thenCb(this.value);
+                                this.resolvePromise(promise2, x, resolve, reject);
+                            } catch (e) {
+                                reject(e)
+                            }
+                        })
+                    });
+                    this.onRejectedFunc.push(() => {
+                        setImmediate(() => {
+                            try {
+                                let x = catchhCb(this.reason);
+                                this.resolvePromise(promise2, x, resolve, reject);
+                            } catch (e) {
+                                reject(e);
+                            }
+                        })
+                    });
                 })
-            })
-        }
-        if (this.state === 'reject') {
-            promise2 = new MyPromise((resolve, reject) => {
-                setImmediate(() => {
-                    try {
-                        let x = catchhCb(this.reason);
-                        this.resolvePromise(promise2, x, resolve, reject);
-                    } catch (e) {
-                        reject(e);
-                    }
-                })
-
-            })
-        }
-        // 当调用then时可能没成功 也没失败
-        if (this.state === 'pending') {
-            promise2 = new MyPromise((resolve, reject) => {
-                // 此时没有resolve 也没有reject
-
-                this.onfullilledFunc.push(() => {
+                break;
+            case 'resolve':
+                promise2 = new MyPromise((resolve, reject) => {
+                    // 当成功或者失败执行时有异常那么返回的promise应该处于失败状态
+                    // x可能是一个promise 也有可能是一个普通的值
                     setImmediate(() => {
+
                         try {
                             let x = thenCb(this.value);
+                            // x可能是别人promise，写一个方法统一处理
                             this.resolvePromise(promise2, x, resolve, reject);
                         } catch (e) {
-                            reject(e)
+                            reject(e);
                         }
                     })
-                });
-                this.onRejectedFunc.push(() => {
+                })
+                break;
+            case 'reject':
+                promise2 = new MyPromise((resolve, reject) => {
                     setImmediate(() => {
                         try {
                             let x = catchhCb(this.reason);
@@ -102,9 +99,14 @@ class MyPromise {
                             reject(e);
                         }
                     })
-                });
-            })
+
+                })
+                break;
+
+            default:
+                break;
         }
+
         return promise2;
     }
 
@@ -155,7 +157,74 @@ class MyPromise {
 
 
 
-const mp = new MyPromise((res, rej) => {
+// const mp = new MyPromise((res, rej) => {
+//     console.log('这个函数体中的代码是立即执行的,我就是构造函数里面的excutor')
+//     setTimeout(() => {
+//         res('我是resolve参数')
+//     }, 2000);
+// }).then(res => {
+//     console.log('then里面的回调是什么时候执行的？是在resolve里面遍历执行的')
+//     console.log(res)
+//     return 1
+// })
+
+
+
+
+
+
+class Mp {
+    constructor(excute) {
+        this.value = null;
+        this.reason = null;
+        this.onfullilledFunc = []
+        this.onRejectedFunc = []
+        this.state = 'pending'
+        excute(this.resolve.bind(this), this.reject.bind(this))
+    }
+
+    resolve(value) {
+        this.value = value;
+        this.onfullilledFunc.forEach(f => {
+            f(value)
+        })
+        this.state = 'onfullied'
+    }
+
+    reject(reason) {
+        this.reason = reason;
+        this.onfullilledFunc.forEach(f => {
+            f(reason)
+        })
+        this.state = 'onrejected'
+    }
+
+    then(resolveCb, rejectCb) {
+        switch (this.state) {
+            case 'pending':
+                this.onfullilledFunc.push(resolveCb)
+                this.onRejectedFunc.push(rejectCb)
+                break;
+            case 'onfullied':
+                this.onfullilledFunc.push(resolveCb)
+                break;
+            case 'onrejected':
+                this.onRejectedFunc.push(rejectCb)
+                break;
+
+            default:
+                break;
+        }
+
+    }
+
+    catch (rejectCb) {
+        this.then(null,rejectCb)
+    }
+
+}
+
+new Mp((res, rej) => {
     console.log('这个函数体中的代码是立即执行的,我就是构造函数里面的excutor')
     setTimeout(() => {
         res('我是resolve参数')
@@ -165,5 +234,3 @@ const mp = new MyPromise((res, rej) => {
     console.log(res)
     return 1
 })
-
-

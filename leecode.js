@@ -104,10 +104,26 @@ var isValidSudoku = function (board) {
   [9,6,3]
 ]
 */
-[0, 0] => [0, 2]
-[0, 1] => [1, 2]
-[0, 2] => [2, 2]
+// [0, 0] => [0, 2]
+// [0, 1] => [1, 2]
+// [0, 2] => [2, 2]
 
 var rotate = function (matrix) {
 
 };
+
+
+function arrfunc() {
+    var arr = []
+    for (var index = 0; index < 10; index++) {
+        arr[index] = (function (i) {
+            return function () {
+                return i
+            }
+        })(index)
+
+    }
+    return arr
+
+}
+console.log(arrfunc()[0]())

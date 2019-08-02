@@ -105,3 +105,24 @@ function bar() {
 
 var a = 2;
 bar();
+
+
+
+
+var obj = {
+    aaaa: 1,
+    action: () => {
+        console.log(this.aaaa, this === obj, this.action)
+    },
+    obj: {
+        aaaa: 2,
+        obj: {
+            aaaa: 3,
+            action: () => {
+                console.log(this.aaaa, this)
+            }
+        }
+    }
+}
+
+obj.action()

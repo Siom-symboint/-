@@ -27,6 +27,7 @@ const initDesc = (target: Cate) => {
 }
 
 
+
 @initDesc
 class Mat {
     constructor(a: number) { }

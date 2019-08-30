@@ -78,11 +78,11 @@ subject.next(1);
 subject.next(2);
 //observerA: 1observerB: 1observerA: 2observerB:
 
-subject.subscribe({
-    next: (v) => console.log('observerA: ' + v)
-});
-subject.subscribe({
-    next: (v) => console.log('observerB: ' + v)
-});
+
 var observable = Rx.Observable.from([1, 2, 3]);
 observable.subscribe(subject); // You can subscribe providing a Subject
+/**
+ * 用上面的方式，我们本质上是通过将一个单播的可观察对象转化为多播。这个演示了Subjects是任何将可观察对象执行分享给多个观察者。
+ * (译者注:注意观察上面的两个subject.subscribe()中传入的两个观察者对象
+ * 一个"多播的可观察对象"通过具有多个订阅者的Subject对象传递通知。然而一个单纯的"单播可观察对象"仅仅给一个单一的观察者发送通
+ */

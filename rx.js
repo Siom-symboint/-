@@ -64,7 +64,7 @@ subscription.unsubscribe()
 
 /**
  * Subject就是一个observable可观察对象，只不过可以被多播至多个观察者observe。同时Subject也类似于EventEmitter:维护者着众多事件监听器的注册
- * 更同时Subject本身也是一个观察者
+ * 当作为一个observable 时,想要提供新的值就调用next()方法,其结果会被多播(广播)到作为subscrible()的argument的observer(观察者)中去
  */
 
 var subject = new Rx.Subject();
@@ -82,7 +82,10 @@ subject.next(2);
 var observable = Rx.Observable.from([1, 2, 3]);
 observable.subscribe(subject); // You can subscribe providing a Subject
 /**
+ *  更同时Subject本身也是一个观察者
  * 用上面的方式，我们本质上是通过将一个单播的可观察对象转化为多播。这个演示了Subjects是任何将可观察对象执行分享给多个观察者。
+ * (Subject自己作为一个特殊的observable,当作为observer作为subscribe的参数时,本质上它会将单播的observable(例子中的 Rx.Observable.from([1, 2, 3]))的值多播(多点广播)给自己的observer
+ * 即实例中的两个带subscribe的对象参数)
  * (译者注:注意观察上面的两个subject.subscribe()中传入的两个观察者对象
  * 一个"多播的可观察对象"通过具有多个订阅者的Subject对象传递通知。然而一个单纯的"单播可观察对象"仅仅给一个单一的观察者发送通
  */

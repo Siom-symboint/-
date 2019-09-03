@@ -140,8 +140,8 @@ var output = multiplyByTen(input); output.subscribe((x: any) => console.log(x));
  */
 var observable = Rx.Observable.create(function (proxyObserver: any) {
     proxyObserver.next(1);
-    proxyObserver.next(2); 
-    proxyObserver.next(3); 
+    proxyObserver.next(2);
+    proxyObserver.next(3);
     proxyObserver.complete();
 }).observeOn(Rx.asyncScheduler);
 var finalObserver = {
@@ -151,3 +151,28 @@ var finalObserver = {
 };
 console.log('just before subscribe');
 observable.subscribe(finalObserver); console.log('just after subscribe');
+
+
+
+
+// Dynamically calculate the Body-Mass Index from an Observable of weight and one for height 
+/**
+ * the last item of arg[0]  and each arg[1] put into the arg[2] as the arguments
+ * which named combileLatests
+ * as the result
+ * 75 1.76
+ * VM590:1
+ * BMI is 24.212293388429753
+ * rx.ts:162
+ * 75 1.77
+ * rx.ts:161
+ * BMI is 23.93948099205209
+ * rx.ts:162
+ * 75 1.78
+ * rx.ts:161
+ * BMI is 23.671253629592222
+ */
+var weight = Rx.Observable.of(70, 72, 76, 79, 75);
+var height = Rx.Observable.of(1.76, 1.77, 1.78);
+var bmi = Rx.Observable.combineLatest(weight, height, (w:number, h:number) =>{console.log(w,h);return  w / (h * h)});
+bmi.subscribe(x => console.log('BMI is ' + x));

@@ -1,8 +1,10 @@
 import * as Rx from 'rxjs';
 import {
-    Observer, Observable,
+    Observer, Observable, Subscribable, Subscriber,
 } from 'rxjs';
+import { take, map, combineAll } from 'rxjs/operators';
 import "rxjs-compat"
+import { mapTo } from 'rxjs-compat/operator/mapTo';
 /**
  * @deprecated the core step
  * 
@@ -64,7 +66,7 @@ subscription.unsubscribe()
 
 /**
  * Subject就是一个observable可观察对象，只不过可以被多播至多个观察者observe。同时Subject也类似于EventEmitter:维护者着众多事件监听器的注册
- * 更同时Subject本身也是一个观察者
+ * 当作为一个observable 时,想要提供新的值就调用next()方法,其结果会被多播(广播)到作为subscrible()的argument的observer(观察者)中去
  */
 
 var subject = new Rx.Subject();
@@ -174,5 +176,85 @@ observable.subscribe(finalObserver); console.log('just after subscribe');
  */
 var weight = Rx.Observable.of(70, 72, 76, 79, 75);
 var height = Rx.Observable.of(1.76, 1.77, 1.78);
-var bmi = Rx.Observable.combineLatest(weight, height, (w:number, h:number) =>{console.log(w,h);return  w / (h * h)});
-bmi.subscribe(x => console.log('BMI is ' + x));
+var bmi = Rx.Observable.combineLatest(weight, height, (w: number, h: number) => { console.log(w, h); return w / (h * h) });
+// bmi.subscribe(x => console.log('BMI is ' + x));
+
+
+
+
+// 每秒发出值，并只取前2个
+const source = Rx.interval(1000).pipe(take(2));
+// 将 source 发出的每个值映射成取前5个值的 interval observable
+const example = source.pipe(
+    map(val => Rx.interval(1000).pipe(map(i => `Result (${val}): ${i}`), take(5)))
+);
+/*
+  soure 中的2个值会被映射成2个(内部的) interval observables，
+  这2个内部 observables 每秒使用 combineLatest 策略来 combineAll，
+  每当任意一个内部 observable 发出值，就会发出每个内部 observable 的最新值。
+*/
+const combined = example.pipe(combineAll());
+// const subscribe = combined.subscribe(val => console.log(val));
+
+/*
+  输出:
+  ["Result (0): 0", "Result (1): 0"]
+  ["Result (0): 1", "Result (1): 0"]
+  ["Result (0): 1", "Result (1): 1"]
+  ["Result (0): 2", "Result (1): 1"]
+  ["Result (0): 2", "Result (1): 2"]
+  ["Result (0): 3", "Result (1): 2"]
+  ["Result (0): 3", "Result (1): 3"]
+  ["Result (0): 4", "Result (1): 3"]
+  ["Result (0): 4", "Result (1): 4"]
+*/
+
+
+
+// explation of  'concat', excute in the way that order  and sync
+
+var timer = Rx.Observable.interval(1000).take(4);
+var sequence = Rx.Observable.range(1, 10);
+var result = Rx.Observable.concat(timer, sequence);
+result.subscribe(x => console.log(x));
+
+
+var timer1 = Rx.Observable.interval(1000).take(10);
+var timer2 = Rx.Observable.interval(2000).take(6);
+var timer3 = Rx.Observable.interval(500).take(10);
+var result = Rx.Observable.concat(timer1, timer2, timer3);
+result.subscribe(x => console.log(x));
+
+
+
+result = Rx.Observable.create(function (observer: Observer<number>) {
+    observer.next(Math.random());
+    observer.next(Math.random());
+    observer.next(Math.random());
+    observer.complete();
+});
+result.subscribe(x => console.log(x));
+
+
+
+var interval = Rx.Observable.interval(1000)
+var result = interval.mergeMap(x =>
+    x % 2 === 1 ? Rx.Observable.of('a', 'b', 'c') : Rx.Observable.
+        empty()
+);
+result.subscribe(x => console.log(x))
+
+
+
+/**
+ * @description  merge description
+ */
+
+// 每2.5秒发出值
+const first = Rx.Observable.interval(500).mapTo('showway');
+// 每1秒发出值
+const second = Rx.Observable.interval(500);
+// 作为实例方法使用
+const exam = Rx.Observable.merge(first, second)
+// 输出: 0,1,0,2....
+const subscribe = exam.subscribe(val => console.log(val, 'from 259', new Date().getTime()));

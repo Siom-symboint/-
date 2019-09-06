@@ -9,9 +9,9 @@ import { mapTo } from 'rxjs-compat/operator/mapTo';
  * @deprecated the core step
  * 
  * Creating Observables   创建观察对象
- * Subscribing to Observables  观察观察对象
+ * Subscribing to Observables  观察(订阅)观察对象
  * Executing the Observable   执行->可观察对象
- * Disposing Observabl    订阅 ->可观察对象
+ * Disposing Observabl    清理 ->可观察对象
  */
 
 /**

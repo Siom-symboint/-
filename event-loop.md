@@ -34,25 +34,27 @@ event loop里只有一个microtask 队列。
 
 HTML Standard没有具体指明哪些是microtask任务源，通常认为是microtask任务源有：
 
+```js
 process.nextTick
 promises
 Object.observe
 MutationObserver
+```
 
 ###在现在大部分主流浏览器版本定义里,promises属于microtask中,但也有例外,比如safari 9.1.2
 
 event loop的处理过程（Processing model）
 在规范的Processing model定义了event loop的循环过程：
 
-一个event loop只要存在，就会不断执行下边的步骤：
-1.在tasks队列中选择最老的一个task,用户代理可以选择任何task队列，如果没有可选的任务，则跳到下边的microtasks步骤。
-2.将上边选择的task设置为正在运行的task。
-3.Run: 运行被选择的task。
-4.将event loop的currently running task变为null。
-5.从task队列里移除前边运行的task。
-6.Microtasks: 执行```microtasks任务检查点```。（也就是执行microtasks队列里的任务）
-7.更新渲染（Update the rendering）...
-8.如果这是一个worker event loop，但是没有任务在task队列中，并且WorkerGlobalScope对象的closing标识为true，则销毁event loop，中止这些步骤，然后进行定义在Web workers章节的run a worker。
+一个event loop只要存在，就会不断执行下边的步骤： 
+1.在tasks队列中选择最老的一个task,用户代理可以选择任何task队列，如果没有可选的任务，则跳到下边的microtasks步骤。 
+2.将上边选择的task设置为正在运行的task。 
+3.Run: 运行被选择的task。 
+4.将event loop的currently running task变为null。 
+5.从task队列里移除前边运行的task。  
+6.Microtasks: 执行```microtasks任务检查点```。（也就是执行microtasks队列里的任务） 
+7.更新渲染（Update the rendering）... 
+8.如果这是一个worker event loop，但是没有任务在task队列中，并且WorkerGlobalScope对象的closing标识为true，则销毁event loop，中止这些步骤，然后进行定义在Web workers章节的run a worker。  
 9.返回到第一步。
 
 event loop会不断循环上面的步骤，概括说来：
@@ -91,4 +93,4 @@ microtask checkpoint所做的就是执行microtask队列里的任务。什么时
 
 
 
-ask和microtask都是推入栈中执行的，要完整了解event loops还需要认识JavaScript execution context stack，它的规范位于https://tc39.github.io/ecma262/#execution-context-stack。
+macrotasks和microtask都是推入栈中执行的，要完整了解event loops还需要认识JavaScript execution context stack，它的规范位于https://tc39.github.io/ecma262/#execution-context-stack。

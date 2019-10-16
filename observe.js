@@ -21,7 +21,7 @@ export function defineReactive(obj, key, val) {
         configurable: true,
         get: () => val,
         set: newVal => {
-            childOb = observe(newVal)//如果新赋值的值是个复杂类型。再递归它，加上set/get。。
+            childOb = observe(newVal) //如果新赋值的值是个复杂类型。再递归它，加上set/get。。
         }
     })
 }
@@ -40,9 +40,9 @@ class Dep {
         this.subs = []
     }
     addSub(sub) {
-        this.subs.push(sub)
+        this.subs.push(sub) // 添加订阅者
     }
     notify() {
-        this.subs.forEach(sub => sub.update())
+        this.subs.forEach(sub => sub.update()) // 伪代码
     }
 }
